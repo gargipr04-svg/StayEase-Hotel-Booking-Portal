@@ -1,3 +1,4 @@
+
 export interface Hotel {
   hotelId: number;
   name: string;
@@ -10,4 +11,12 @@ export interface Hotel {
   pricePerNight: number | null;
 
   amenities: string[];
+
+  highlights: string | null;
+  nearbyAttractions: string | null;
+  idealFor: string | null;
+
+  maxAdultsPerRoom: number | null;
+  maxChildrenPerRoom: number | null;
+  maxOccupancy: number | null;
 }

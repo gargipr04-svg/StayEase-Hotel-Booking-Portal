@@ -1,6 +1,5 @@
 package com.stayease.backend.entity;
 
-// JPA annotations
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -35,6 +34,18 @@ public class Hotel {
     // Hotel image URL
     @Column(name = "image_url", length = 500)
     private String imageUrl;
+
+    // Hotel highlights
+    @Column(name = "highlights", columnDefinition = "TEXT")
+    private String highlights;
+
+    // Nearby tourist attractions
+    @Column(name = "nearby_attractions", columnDefinition = "TEXT")
+    private String nearbyAttractions;
+
+    // Type of guests the hotel is ideal for
+    @Column(name = "ideal_for", length = 500)
+    private String idealFor;
 
     // Record creation time (managed by MySQL)
     @Column(name = "created_at", insertable = false, updatable = false)
@@ -84,6 +95,30 @@ public class Hotel {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public String getHighlights() {
+        return highlights;
+    }
+
+    public void setHighlights(String highlights) {
+        this.highlights = highlights;
+    }
+
+    public String getNearbyAttractions() {
+        return nearbyAttractions;
+    }
+
+    public void setNearbyAttractions(String nearbyAttractions) {
+        this.nearbyAttractions = nearbyAttractions;
+    }
+
+    public String getIdealFor() {
+        return idealFor;
+    }
+
+    public void setIdealFor(String idealFor) {
+        this.idealFor = idealFor;
     }
 
     public LocalDateTime getCreatedAt() {

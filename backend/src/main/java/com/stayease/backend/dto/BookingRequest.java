@@ -1,12 +1,16 @@
 package com.stayease.backend.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class BookingRequest {
 
@@ -31,6 +35,19 @@ public class BookingRequest {
 
     @NotNull(message = "Check-out date is required")
     private LocalDate checkOut;
+
+    // Optional meal package selected by the customer
+    @Positive(message = "Meal package ID must be positive")
+    private Long mealPackageId;
+
+    // Guest allocation for each room
+    @NotEmpty(message = "At least one room must be selected")
+    @Valid
+    private List<RoomAllocation> rooms;
+
+    // Default constructor
+    public BookingRequest() {
+    }
 
     // Getters and setters
 
@@ -72,5 +89,76 @@ public class BookingRequest {
 
     public void setCheckOut(LocalDate checkOut) {
         this.checkOut = checkOut;
+    }
+
+    public Long getMealPackageId() {
+        return mealPackageId;
+    }
+
+    public void setMealPackageId(Long mealPackageId) {
+        this.mealPackageId = mealPackageId;
+    }
+
+    public List<RoomAllocation> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(List<RoomAllocation> rooms) {
+        this.rooms = rooms;
+    }
+
+    // Individual room guest allocation
+    public static class RoomAllocation {
+
+        @NotNull(message = "Room number is required")
+        @Positive(message = "Room number must be positive")
+        private Integer roomNumber;
+
+        @NotNull(message = "Number of adults is required")
+        @Min(value = 1, message = "Every room must have at least one adult")
+        private Integer adultsCount;
+
+        @NotNull(message = "Number of children aged 5 to 11 is required")
+        @Min(value = 0, message = "Children count cannot be negative")
+        private Integer children5To11Count;
+
+        @NotNull(message = "Number of children under 5 is required")
+        @Min(value = 0, message = "Children count cannot be negative")
+        private Integer childrenUnder5Count;
+
+        public RoomAllocation() {
+        }
+
+        public Integer getRoomNumber() {
+            return roomNumber;
+        }
+
+        public void setRoomNumber(Integer roomNumber) {
+            this.roomNumber = roomNumber;
+        }
+
+        public Integer getAdultsCount() {
+            return adultsCount;
+        }
+
+        public void setAdultsCount(Integer adultsCount) {
+            this.adultsCount = adultsCount;
+        }
+
+        public Integer getChildren5To11Count() {
+            return children5To11Count;
+        }
+
+        public void setChildren5To11Count(Integer children5To11Count) {
+            this.children5To11Count = children5To11Count;
+        }
+
+        public Integer getChildrenUnder5Count() {
+            return childrenUnder5Count;
+        }
+
+        public void setChildrenUnder5Count(Integer childrenUnder5Count) {
+            this.childrenUnder5Count = childrenUnder5Count;
+        }
     }
 }

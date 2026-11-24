@@ -1,3 +1,4 @@
+
 package com.stayease.backend.entity;
 
 import jakarta.persistence.Entity;
@@ -7,69 +8,108 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.CascadeType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "bookings")
 public class Booking {
 
-    // Primary key
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
     private Long bookingId;
 
-    // Unique booking reference
     @Column(name = "booking_reference", nullable = false,
             unique = true, length = 30)
     private String bookingReference;
 
-    // Relationship with Hotel
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-    // Guest information
     @Column(name = "guest_name", nullable = false, length = 150)
     private String guestName;
 
     @Column(name = "email", nullable = false, length = 255)
     private String email;
 
-    // Booking dates
     @Column(name = "check_in", nullable = false)
     private LocalDate checkIn;
 
     @Column(name = "check_out", nullable = false)
     private LocalDate checkOut;
 
-    // Price snapshot at booking time
     @Column(name = "price_per_night", nullable = false,
             precision = 10, scale = 2)
     private BigDecimal pricePerNight;
 
-    // Number of nights
     @Column(name = "nights", nullable = false)
     private Integer nights;
 
-    // Total booking amount
     @Column(name = "total_amount", nullable = false,
             precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
-    // Booking status
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private BookingStatus status = BookingStatus.CONFIRMED;
 
+    // Room and guest details
+
+    @Column(name = "rooms_count", nullable = false)
+    private Integer roomsCount = 1;
+
+    @Column(name = "adults_count", nullable = false)
+    private Integer adultsCount = 1;
+
+    @Column(name = "children_5_to_11_count", nullable = false)
+    private Integer children5To11Count = 0;
+
+    @Column(name = "children_under_5_count", nullable = false)
+    private Integer childrenUnder5Count = 0;
+
+    // Meal package relationship
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "meal_package_id")
+    private MealPackage mealPackage;
+
+    @Column(name = "meal_price_per_adult_per_night",
+            nullable = false, precision = 10, scale = 2)
+    private BigDecimal mealPricePerAdultPerNight = BigDecimal.ZERO;
+
+    // Separate booking charges
+
+    @Column(name = "room_total", nullable = false,
+            precision = 12, scale = 2)
+    private BigDecimal roomTotal = BigDecimal.ZERO;
+
+    @Column(name = "meal_total", nullable = false,
+            precision = 12, scale = 2)
+    private BigDecimal mealTotal = BigDecimal.ZERO;
+
+    // Room-wise guest allocation
+
+    @OneToMany(
+            mappedBy = "booking",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<BookingRoom> bookingRooms = new ArrayList<>();
+
     // Database-managed timestamps
+
     @Column(name = "created_at",
             insertable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -78,7 +118,8 @@ public class Booking {
             insertable = false, updatable = false)
     private LocalDateTime updatedAt;
 
-    // Default constructor required by JPA
+    // Default constructor
+
     public Booking() {
     }
 
@@ -170,6 +211,79 @@ public class Booking {
 
     public void setStatus(BookingStatus status) {
         this.status = status;
+    }
+
+    public Integer getRoomsCount() {
+        return roomsCount;
+    }
+
+    public void setRoomsCount(Integer roomsCount) {
+        this.roomsCount = roomsCount;
+    }
+
+    public Integer getAdultsCount() {
+        return adultsCount;
+    }
+
+    public void setAdultsCount(Integer adultsCount) {
+        this.adultsCount = adultsCount;
+    }
+
+    public Integer getChildren5To11Count() {
+        return children5To11Count;
+    }
+
+    public void setChildren5To11Count(Integer children5To11Count) {
+        this.children5To11Count = children5To11Count;
+    }
+
+    public Integer getChildrenUnder5Count() {
+        return childrenUnder5Count;
+    }
+
+    public void setChildrenUnder5Count(Integer childrenUnder5Count) {
+        this.childrenUnder5Count = childrenUnder5Count;
+    }
+
+    public MealPackage getMealPackage() {
+        return mealPackage;
+    }
+
+    public void setMealPackage(MealPackage mealPackage) {
+        this.mealPackage = mealPackage;
+    }
+
+    public BigDecimal getMealPricePerAdultPerNight() {
+        return mealPricePerAdultPerNight;
+    }
+
+    public void setMealPricePerAdultPerNight(
+            BigDecimal mealPricePerAdultPerNight) {
+        this.mealPricePerAdultPerNight = mealPricePerAdultPerNight;
+    }
+
+    public BigDecimal getRoomTotal() {
+        return roomTotal;
+    }
+
+    public void setRoomTotal(BigDecimal roomTotal) {
+        this.roomTotal = roomTotal;
+    }
+
+    public BigDecimal getMealTotal() {
+        return mealTotal;
+    }
+
+    public void setMealTotal(BigDecimal mealTotal) {
+        this.mealTotal = mealTotal;
+    }
+
+    public List<BookingRoom> getBookingRooms() {
+        return bookingRooms;
+    }
+
+    public void setBookingRooms(List<BookingRoom> bookingRooms) {
+        this.bookingRooms = bookingRooms;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -28,6 +28,7 @@ public interface BookingRepository
     );
 
     // Count confirmed bookings that overlap with requested dates
+    // Retained for compatibility with existing code
     @Query("""
         SELECT COUNT(b)
         FROM Booking b
@@ -37,6 +38,23 @@ public interface BookingRepository
         AND b.checkOut > :checkIn
         """)
     long countOverlappingBookings(
+            @Param("hotelId") Long hotelId,
+            @Param("status") BookingStatus status,
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut
+    );
+
+    // Calculate the actual number of rooms booked
+    // across all overlapping confirmed bookings
+    @Query("""
+        SELECT COALESCE(SUM(b.roomsCount), 0)
+        FROM Booking b
+        WHERE b.hotel.hotelId = :hotelId
+        AND b.status = :status
+        AND b.checkIn < :checkOut
+        AND b.checkOut > :checkIn
+        """)
+    long sumOverlappingRooms(
             @Param("hotelId") Long hotelId,
             @Param("status") BookingStatus status,
             @Param("checkIn") LocalDate checkIn,
@@ -55,5 +73,4 @@ public interface BookingRepository
             @Param("reference") String reference,
             @Param("email") String email
     );
-
 }

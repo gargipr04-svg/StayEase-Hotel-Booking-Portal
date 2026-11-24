@@ -2,6 +2,7 @@ package com.stayease.backend.controller;
 
 // DTO imports
 import com.stayease.backend.dto.HotelResponse;
+import com.stayease.backend.dto.MealPackageResponse;
 import com.stayease.backend.dto.SearchRequest;
 import com.stayease.backend.dto.SmartStayMatchRequest;
 import com.stayease.backend.dto.SmartStayMatchResponse;
@@ -48,7 +49,6 @@ public class HotelController {
         return hotelService.getAllHotels();
     }
 
-
     // ==========================================
     // 2. GET HOTEL BY ID
     // GET /api/hotels/{hotelId}
@@ -61,9 +61,31 @@ public class HotelController {
         return hotelService.getHotelById(hotelId);
     }
 
+    // ==========================================
+    // 3. GET ALL HOTEL LOCATIONS
+    // GET /api/hotels/locations
+    // ==========================================
+
+    @GetMapping("/locations")
+    public List<String> getAllLocations() {
+
+        return hotelService.getAllLocations();
+    }
 
     // ==========================================
-    // 3. SEARCH HOTELS BY LOCATION AND DATES
+    // 4. GET HOTEL MEAL PACKAGES
+    // GET /api/hotels/{hotelId}/meal-packages
+    // ==========================================
+
+    @GetMapping("/{hotelId}/meal-packages")
+    public List<MealPackageResponse> getMealPackages(
+            @PathVariable Long hotelId) {
+
+        return hotelService.getMealPackages(hotelId);
+    }
+
+    // ==========================================
+    // 5. SEARCH HOTELS BY LOCATION AND DATES
     // GET /api/hotels/search
     // ==========================================
 
@@ -88,9 +110,8 @@ public class HotelController {
         return hotelService.searchHotels(request);
     }
 
-
     // ==========================================
-    // 4. CHECK ROOM AVAILABILITY
+    // 6. CHECK ROOM AVAILABILITY
     // GET /api/hotels/{hotelId}/availability
     // ==========================================
 
@@ -122,9 +143,8 @@ public class HotelController {
         );
     }
 
-
     // ==========================================
-    // 5. SMART STAY MATCH
+    // 7. SMART STAY MATCH
     // POST /api/hotels/smart-match
     // ==========================================
 
@@ -134,5 +154,4 @@ public class HotelController {
 
         return smartStayMatchService.findBestMatches(request);
     }
-
 }

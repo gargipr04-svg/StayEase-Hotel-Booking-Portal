@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -23,14 +25,11 @@ public class GlobalExceptionHandler {
 
     private final Clock clock;
 
-    // Constructor injection
     public GlobalExceptionHandler(Clock clock) {
         this.clock = clock;
     }
 
-    // ==========================================
     // 1. RESOURCE NOT FOUND - HTTP 404
-    // ==========================================
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFound(
@@ -45,10 +44,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // 2. INVALID REQUEST - HTTP 400
-    // ==========================================
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleBadRequest(
@@ -63,10 +59,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // 3. BUSINESS RULE VIOLATION - HTTP 409
-    // ==========================================
 
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ApiErrorResponse> handleConflict(
@@ -81,10 +74,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // 4. VALIDATION ERRORS - HTTP 400
-    // ==========================================
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationErrors(
@@ -110,10 +100,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // 5. INVALID JSON OR DATE FORMAT - HTTP 400
-    // ==========================================
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleUnreadableRequest(
@@ -128,10 +115,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // 6. INVALID URL PARAMETER - HTTP 400
-    // ==========================================
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatch(
@@ -147,17 +131,45 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // 7. MISSING URL PARAMETER - HTTP 400
 
-    // ==========================================
-    // 7. UNEXPECTED SERVER ERROR - HTTP 500
-    // ==========================================
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiErrorResponse> handleMissingParameter(
+            MissingServletRequestParameterException exception,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST,
+                "Required parameter is missing: "
+                        + exception.getParameterName(),
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    // 8. UNSUPPORTED HTTP METHOD - HTTP 405
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException exception,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                HttpStatus.METHOD_NOT_ALLOWED,
+                "HTTP method " + exception.getMethod()
+                        + " is not supported for this endpoint.",
+                request.getRequestURI(),
+                Map.of()
+        );
+    }
+
+    // 9. UNEXPECTED SERVER ERROR - HTTP 500
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpectedError(
             Exception exception,
             HttpServletRequest request) {
 
-        // Keep detailed exception information in server logs
         exception.printStackTrace();
 
         return buildResponse(
@@ -168,10 +180,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-
-    // ==========================================
     // COMMON ERROR RESPONSE BUILDER
-    // ==========================================
 
     private ResponseEntity<ApiErrorResponse> buildResponse(
             HttpStatus status,

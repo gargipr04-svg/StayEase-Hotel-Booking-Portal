@@ -1,4 +1,3 @@
-
 package com.stayease.backend.entity;
 
 import jakarta.persistence.Entity;
@@ -32,14 +31,26 @@ public class RoomInventory {
     @Column(name = "room_type", nullable = false, length = 100)
     private String roomType;
 
-    // Total available rooms in the hotel
+    // Total rooms in the hotel
     @Column(name = "total_rooms", nullable = false)
     private Integer totalRooms;
 
-    // Price per night
+    // Price per night per room
     @Column(name = "price_per_night", nullable = false,
             precision = 10, scale = 2)
     private BigDecimal pricePerNight;
+
+    // Maximum adults allowed in one room
+    @Column(name = "max_adults_per_room", nullable = false)
+    private Integer maxAdultsPerRoom = 2;
+
+    // Maximum children allowed in one room
+    @Column(name = "max_children_per_room", nullable = false)
+    private Integer maxChildrenPerRoom = 2;
+
+    // Maximum total guests allowed in one room
+    @Column(name = "max_occupancy", nullable = false)
+    private Integer maxOccupancy = 4;
 
     // Default constructor required by JPA
     public RoomInventory() {
@@ -85,5 +96,29 @@ public class RoomInventory {
 
     public void setPricePerNight(BigDecimal pricePerNight) {
         this.pricePerNight = pricePerNight;
+    }
+
+    public Integer getMaxAdultsPerRoom() {
+        return maxAdultsPerRoom;
+    }
+
+    public void setMaxAdultsPerRoom(Integer maxAdultsPerRoom) {
+        this.maxAdultsPerRoom = maxAdultsPerRoom;
+    }
+
+    public Integer getMaxChildrenPerRoom() {
+        return maxChildrenPerRoom;
+    }
+
+    public void setMaxChildrenPerRoom(Integer maxChildrenPerRoom) {
+        this.maxChildrenPerRoom = maxChildrenPerRoom;
+    }
+
+    public Integer getMaxOccupancy() {
+        return maxOccupancy;
+    }
+
+    public void setMaxOccupancy(Integer maxOccupancy) {
+        this.maxOccupancy = maxOccupancy;
     }
 }

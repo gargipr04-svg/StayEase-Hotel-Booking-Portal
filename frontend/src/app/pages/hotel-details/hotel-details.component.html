@@ -66,24 +66,23 @@
 
                 <p>{{ hotel.description }}</p>
 
-                
-<div class="room-summary">
+                <div class="room-summary">
 
-    <span>
-        {{ hotel.roomType || 'Room information unavailable' }}
-    </span>
+                    <span>
+                        {{ hotel.roomType || 'Room information unavailable' }}
+                    </span>
 
-    <span>
-        {{ hotel.totalRooms ?? 'N/A' }} total rooms
-    </span>
+                    <span>
+                        {{ hotel.totalRooms ?? 'N/A' }} total rooms
+                    </span>
 
-    @if (availableRooms !== null) {
-        <span class="available-rooms">
-            {{ availableRooms }} rooms available
-        </span>
-    }
+                    @if (availableRooms !== null) {
+                        <span class="available-rooms">
+                            {{ availableRooms }} rooms available
+                        </span>
+                    }
 
-</div>
+                </div>
 
             </div>
 
@@ -120,6 +119,33 @@
 
                 </div>
 
+                <div class="booking-information">
+
+                    <h3>Room Occupancy Information</h3>
+
+                    <p>
+                        Maximum adults per room:
+                        <strong>{{ maxAdultsPerRoom }}</strong>
+                    </p>
+
+                    <p>
+                        Maximum children per room:
+                        <strong>{{ maxChildrenPerRoom }}</strong>
+                    </p>
+
+                    <p>
+                        Maximum total guests per room:
+                        <strong>{{ maxOccupancy }}</strong>
+                    </p>
+
+                    <p>
+                        Children aged 5–11 receive 50% off meal charges.
+                        Children under 5 eat free.
+                        All children count towards room occupancy.
+                    </p>
+
+                </div>
+
             </div>
 
             <!-- BOOKING CARD -->
@@ -153,12 +179,62 @@
                             {{ bookingSuccess.guestName }}
                         </strong>
 
+                        <p>Email address</p>
+                        <strong>
+                            {{ bookingSuccess.email }}
+                        </strong>
+
+                        <p>Hotel</p>
+                        <strong>
+                            {{ bookingSuccess.hotelName }}
+                        </strong>
+
                         <p>Stay duration</p>
                         <strong>
                             {{ bookingSuccess.nights }} nights
                         </strong>
 
+                        <p>Number of rooms</p>
+                        <strong>
+                            {{ bookingSuccess.roomsCount }}
+                        </strong>
+
+                        <p>Total adults</p>
+                        <strong>
+                            {{ bookingSuccess.adultsCount }}
+                        </strong>
+
+                        <p>Children aged 5–11</p>
+                        <strong>
+                            {{ bookingSuccess.children5To11Count }}
+                        </strong>
+
+                        <p>Children under 5</p>
+                        <strong>
+                            {{ bookingSuccess.childrenUnder5Count }}
+                        </strong>
+
+                        <div class="booking-divider"></div>
+
+                        <h3>Price Breakdown</h3>
+
+                        <p>Room charges</p>
+                        <strong>
+                            {{ bookingSuccess.roomTotal | currency:'INR':'symbol':'1.0-2' }}
+                        </strong>
+
+                        <p>Meal package</p>
+                        <strong>
+                            {{ bookingSuccess.mealPackageName || 'No meal package' }}
+                        </strong>
+
+                        <p>Meal charges</p>
+                        <strong>
+                            {{ bookingSuccess.mealTotal | currency:'INR':'symbol':'1.0-2' }}
+                        </strong>
+
                         <p>Total amount</p>
+
                         <h2 class="success-price">
                             {{ bookingSuccess.totalAmount | currency:'INR':'symbol':'1.0-2' }}
                         </h2>
@@ -182,13 +258,13 @@
                 @else {
 
                     <span class="booking-label">
-                        RESERVE YOUR ROOM
+                        RESERVE YOUR STAY
                     </span>
 
                     <h2>
                         @if (hotel.pricePerNight !== null) {
                             {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
-                            <small>/ night</small>
+                            <small>/ room / night</small>
                         }
                         @else {
                             Price unavailable
@@ -252,7 +328,7 @@
                                 [(ngModel)]="checkIn"
                                 [min]="today"
                                 required
-                                (ngModelChange)="loadAvailability()"    >
+                                (ngModelChange)="loadAvailability()">
 
                         </div>
 
@@ -274,48 +350,340 @@
 
                         </div>
 
-<!-- ROOM AVAILABILITY -->
+                        <!-- ROOM AVAILABILITY -->
+                        @if (availabilityLoading) {
 
-@if (availabilityLoading) {
+                            <div class="availability-message">
+                                Checking room availability...
+                            </div>
 
-    <div class="availability-message">
-        Checking room availability...
-    </div>
+                        }
+                        @else if (availabilityError) {
 
-}
-@else if (availabilityError) {
+                            <div class="booking-error">
+                                {{ availabilityError }}
+                            </div>
 
-    <div class="booking-error">
-        {{ availabilityError }}
-    </div>
+                        }
+                        @else if (availableRooms !== null) {
 
-}
-@else if (availableRooms !== null) {
+                            <div
+                                class="availability-message"
+                                [class.no-rooms]="availableRooms === 0">
 
-    <div class="availability-message"
-         [class.no-rooms]="availableRooms === 0">
+                                @if (availableRooms > 0) {
+                                    ✓ {{ availableRooms }} rooms available for your dates
+                                }
+                                @else {
+                                    No rooms available for these dates.
+                                }
 
-        @if (availableRooms > 0) {
-            ✓ {{ availableRooms }} rooms available for your dates
-        }
-        @else {
-            No rooms available for these dates.
-        }
+                            </div>
 
-    </div>
+                        }
 
-}
-                            <!-- PRICE PREVIEW -->
+                        <!-- ROOM ALLOCATION -->
+                        <div class="room-allocation-section">
+
+                            <div class="section-heading-row">
+
+                                <h3>Room Selection</h3>
+
+                                <span>
+                                    {{ rooms.length }} room(s)
+                                </span>
+
+                            </div>
+
+                            @for (room of rooms; track room.roomNumber; let i = $index) {
+
+                                <div class="room-allocation-card">
+
+                                    <div class="section-heading-row">
+
+                                        <h4>Room {{ room.roomNumber }}</h4>
+
+                                        @if (rooms.length > 1) {
+
+                                            <button
+                                                type="button"
+                                                class="remove-room-button"
+                                                (click)="removeRoom(i)">
+                                                Remove
+                                            </button>
+
+                                        }
+
+                                    </div>
+
+                                    <!-- ADULTS -->
+                                    <div class="form-group">
+
+                                        <label [for]="'adults-' + i">
+                                            Adults (12+ years)
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            [id]="'adults-' + i"
+                                            [name]="'adults-' + i"
+                                            [(ngModel)]="room.adultsCount"
+                                            min="1"
+                                            [max]="maxAdultsPerRoom"
+                                            required>
+
+                                    </div>
+
+                                    <!-- CHILDREN 5 TO 11 -->
+                                    <div class="form-group">
+
+                                        <label [for]="'children-' + i">
+                                            Children (5–11 years)
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            [id]="'children-' + i"
+                                            [name]="'children-' + i"
+                                            [(ngModel)]="room.children5To11Count"
+                                            min="0"
+                                            [max]="maxChildrenPerRoom"
+                                            required>
+
+                                    </div>
+
+                                    <!-- CHILDREN UNDER 5 -->
+                                    <div class="form-group">
+
+                                        <label [for]="'toddlers-' + i">
+                                            Children (Under 5 years)
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            [id]="'toddlers-' + i"
+                                            [name]="'toddlers-' + i"
+                                            [(ngModel)]="room.childrenUnder5Count"
+                                            min="0"
+                                            [max]="maxChildrenPerRoom"
+                                            required>
+
+                                    </div>
+
+                                    <div class="room-guest-summary">
+
+                                        Total guests in this room:
+                                        <strong>
+                                            {{ getRoomOccupancy(room) }}
+                                        </strong>
+
+                                    </div>
+
+                                    @if (!isRoomValid(room)) {
+
+                                        <div class="booking-error">
+                                            This room does not meet the hotel's occupancy rules.
+                                            Every room needs at least one adult.
+                                        </div>
+
+                                    }
+
+                                </div>
+
+                            }
+
+                            <!-- ADD ROOM -->
+                            <button
+                                type="button"
+                                class="add-room-button"
+                                (click)="addRoom()"
+                                [disabled]="
+                                    availableRooms === null ||
+                                    rooms.length >= availableRooms ||
+                                    availabilityLoading
+                                ">
+
+                                + Add Another Room
+
+                            </button>
+
+                            @if (availableRooms === null) {
+
+                                <p class="booking-note">
+                                    Select your dates to check availability before adding rooms.
+                                </p>
+
+                            }
+
+                        </div>
+
+                        <!-- TOTAL GUEST SUMMARY -->
+                        <div class="guest-summary">
+
+                            <h3>Guest Summary</h3>
+
+                            <p>
+                                Adults:
+                                <strong>{{ totalAdults }}</strong>
+                            </p>
+
+                            <p>
+                                Children (5–11):
+                                <strong>{{ totalChildren5To11 }}</strong>
+                            </p>
+
+                            <p>
+                                Children (Under 5):
+                                <strong>{{ totalChildrenUnder5 }}</strong>
+                            </p>
+
+                            <p>
+                                Total guests:
+                                <strong>{{ totalGuests }}</strong>
+                            </p>
+
+                        </div>
+
+                        <!-- MEAL PACKAGE -->
+                        <div class="meal-package-section">
+
+                            <h3>Choose Your Meal Package</h3>
+
+                            @if (mealPackagesLoading) {
+
+                                <p class="booking-note">
+                                    Loading meal packages...
+                                </p>
+
+                            }
+                            @else if (mealPackagesError) {
+
+                                <div class="booking-error">
+                                    {{ mealPackagesError }}
+                                </div>
+
+                            }
+                            @else {
+
+                                <div class="form-group">
+
+                                    <label for="mealPackage">
+                                        Meal Package
+                                    </label>
+
+                                    <select
+                                        id="mealPackage"
+                                        name="mealPackage"
+                                        [(ngModel)]="selectedMealPackageId">
+
+                                        <option [ngValue]="null">
+                                            No meal package
+                                        </option>
+
+                                        @for (
+                                            meal of mealPackages;
+                                            track meal.packageId
+                                        ) {
+
+                                            <option [ngValue]="meal.packageId">
+
+                                                {{ meal.packageName }}
+                                                -
+                                                {{ meal.pricePerAdultPerNight | currency:'INR':'symbol':'1.0-2' }}
+                                                / adult / night
+
+                                            </option>
+
+                                        }
+
+                                    </select>
+
+                                </div>
+
+                                @if (selectedMealPackage) {
+
+                                    <div class="meal-package-information">
+
+                                        <p>
+                                            <strong>
+                                                {{ selectedMealPackage.packageName }}
+                                            </strong>
+                                        </p>
+
+                                        <p>
+                                            Breakfast:
+                                            {{ selectedMealPackage.includesBreakfast ? 'Included' : 'Not included' }}
+                                        </p>
+
+                                        <p>
+                                            Lunch:
+                                            {{ selectedMealPackage.includesLunch ? 'Included' : 'Not included' }}
+                                        </p>
+
+                                        <p>
+                                            Dinner:
+                                            {{ selectedMealPackage.includesDinner ? 'Included' : 'Not included' }}
+                                        </p>
+
+                                        <p>
+                                            Adults (12+): Full price
+                                        </p>
+
+                                        <p>
+                                            Children (5–11): 50% price
+                                        </p>
+
+                                        <p>
+                                            Children under 5: Free
+                                        </p>
+
+                                    </div>
+
+                                }
+
+                            }
+
+                        </div>
+
+                        <!-- PRICE PREVIEW -->
                         @if (numberOfNights > 0) {
 
                             <div class="price-preview">
 
-                                <div>
-                                    <span>
-                                        {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
-                                    </span>
+                                <h3>Price Breakdown</h3>
 
-                                    × {{ numberOfNights }} nights
+                                <div>
+                                    <span>Room price per night</span>
+
+                                    <strong>
+                                        {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Number of rooms</span>
+                                    <strong>{{ rooms.length }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Number of nights</span>
+                                    <strong>{{ numberOfNights }}</strong>
+                                </div>
+
+                                <div>
+                                    <span>Room charges</span>
+
+                                    <strong>
+                                        {{ roomTotal | currency:'INR':'symbol':'1.0-2' }}
+                                    </strong>
+                                </div>
+
+                                <div>
+                                    <span>Meal charges</span>
+
+                                    <strong>
+                                        {{ mealTotal | currency:'INR':'symbol':'1.0-2' }}
+                                    </strong>
                                 </div>
 
                                 <div class="estimated-total">
@@ -329,6 +697,10 @@
                                     </strong>
 
                                 </div>
+
+                                <p class="booking-note">
+                                    Final amount is subject to backend validation.
+                                </p>
 
                             </div>
 
@@ -348,13 +720,17 @@
                             type="submit"
                             class="book-button"
                             [disabled]="
-  bookingLoading ||
-  bookingForm.invalid ||
-  availabilityLoading ||
-  availabilityError !== '' ||
-  availableRooms === null ||
-  availableRooms <= 0
-">
+                                bookingLoading ||
+                                bookingForm.invalid ||
+                                !areRoomsValid ||
+                                availabilityLoading ||
+                                availabilityError !== '' ||
+                                availableRooms === null ||
+                                availableRooms <= 0 ||
+                                rooms.length > availableRooms ||
+                                mealPackagesLoading ||
+                                mealPackagesError !== ''
+                            ">
 
                             @if (bookingLoading) {
                                 Processing Booking...
@@ -367,7 +743,8 @@
 
                         <p class="booking-note">
                             Your booking will be confirmed after
-                            the backend verifies room availability.
+                            the backend verifies room availability
+                            and guest allocation.
                         </p>
 
                     </form>

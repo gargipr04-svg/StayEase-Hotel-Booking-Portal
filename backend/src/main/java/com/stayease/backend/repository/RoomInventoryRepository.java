@@ -16,8 +16,10 @@ import java.util.Optional;
 public interface RoomInventoryRepository
         extends JpaRepository<RoomInventory, Long> {
 
+    // Find room inventory for a particular hotel
     Optional<RoomInventory> findByHotel_HotelId(Long hotelId);
 
+    // Lock room inventory while processing a booking
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT ri FROM RoomInventory ri WHERE ri.hotel.hotelId = :hotelId")
     Optional<RoomInventory> findByHotelIdForUpdate(

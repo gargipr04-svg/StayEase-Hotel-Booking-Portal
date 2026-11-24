@@ -3,11 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Hotel } from '../models/hotel.model';
+
 import {
   SmartStayMatchRequest,
   SmartStayMatchResponse
 } from '../models/smart-stay-match.model';
-
 
 // Room availability response from Spring Boot
 export interface RoomAvailability {
@@ -16,6 +16,16 @@ export interface RoomAvailability {
   checkOut: string;
   available: boolean;
   availableRooms: number;
+}
+
+// Meal package response from Spring Boot
+export interface MealPackage {
+  packageId: number;
+  packageName: string;
+  includesBreakfast: boolean;
+  includesLunch: boolean;
+  includesDinner: boolean;
+  pricePerAdultPerNight: number;
 }
 
 @Injectable({
@@ -28,15 +38,17 @@ export class HotelService {
 
   constructor(private http: HttpClient) {}
 
-smartStayMatch(
-  request: SmartStayMatchRequest
-): Observable<SmartStayMatchResponse[]> {
-  return this.http.post<SmartStayMatchResponse[]>(
-    `${this.apiUrl}/smart-match`,
-    request
-  );
-}
-    // Retrieve all hotels
+  // Smart Stay Match recommendations
+  smartStayMatch(
+    request: SmartStayMatchRequest
+  ): Observable<SmartStayMatchResponse[]> {
+    return this.http.post<SmartStayMatchResponse[]>(
+      `${this.apiUrl}/smart-match`,
+      request
+    );
+  }
+
+  // Retrieve all hotels
   getAllHotels(): Observable<Hotel[]> {
     return this.http.get<Hotel[]>(this.apiUrl);
   }
@@ -81,6 +93,16 @@ smartStayMatch(
     return this.http.get<RoomAvailability>(
       `${this.apiUrl}/${hotelId}/availability`,
       { params }
+    );
+  }
+
+  // Retrieve meal packages for a particular hotel
+  getMealPackages(
+    hotelId: number
+  ): Observable<MealPackage[]> {
+
+    return this.http.get<MealPackage[]>(
+      `${this.apiUrl}/${hotelId}/meal-packages`
     );
   }
 }
