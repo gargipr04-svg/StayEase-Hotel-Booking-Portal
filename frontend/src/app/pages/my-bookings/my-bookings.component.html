@@ -1,0 +1,311 @@
+<main class="my-bookings-page">
+
+    <!-- NAVIGATION -->
+    <header class="bookings-navbar">
+
+        <a routerLink="/" class="brand">
+            <span class="brand-icon">S</span>
+            <span>StayEase</span>
+        </a>
+
+        <a routerLink="/" class="back-link">
+            ← Back to Home
+        </a>
+
+    </header>
+
+
+    <!-- PAGE INTRODUCTION -->
+    <section class="bookings-intro">
+
+        <span class="section-label">
+            YOUR STAYEASE ACCOUNT
+        </span>
+
+        <h1>My Bookings</h1>
+
+        <p>
+            Find your reservation, review your stay details
+            and manage your hotel bookings.
+        </p>
+
+    </section>
+
+
+    <!-- SEARCH SECTION -->
+    <section class="booking-search-card">
+
+        <h2>Find your reservation</h2>
+
+        <p>
+            Enter your booking reference and registered email address.
+        </p>
+
+        <form
+            #searchForm="ngForm"
+            (ngSubmit)="findBooking()">
+
+            <!-- BOOKING REFERENCE -->
+            <div class="form-group">
+
+                <label for="bookingReference">
+                    Booking Reference
+                </label>
+
+                <input
+                    type="text"
+                    id="bookingReference"
+                    name="bookingReference"
+                    [(ngModel)]="bookingReference"
+                    placeholder="e.g. STAY-3DFF8C0C83724553"
+                    required>
+
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="form-group">
+
+                <label for="email">
+                    Registered Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    [(ngModel)]="email"
+                    placeholder="Enter your booking email"
+                    required
+                    email>
+
+            </div>
+
+
+            <!-- SEARCH BUTTON -->
+            <button
+                type="submit"
+                class="search-button"
+                [disabled]="isLoading || searchForm.invalid">
+
+                @if (isLoading) {
+                    Finding Booking...
+                }
+                @else {
+                    Find My Booking →
+                }
+
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- ERROR MESSAGE -->
+    @if (errorMessage) {
+
+        <div class="message-box error-message">
+            <span>!</span>
+            {{ errorMessage }}
+        </div>
+
+    }
+
+
+    <!-- SUCCESS MESSAGE -->
+    @if (successMessage) {
+
+        <div class="message-box success-message">
+            <span>✓</span>
+            {{ successMessage }}
+        </div>
+
+    }
+
+
+    <!-- BOOKING DETAILS -->
+    @if (booking) {
+
+        <section class="booking-details-card">
+
+            <!-- BOOKING HEADER -->
+            <div class="booking-details-header">
+
+                <div>
+
+                    <span class="section-label">
+                        RESERVATION DETAILS
+                    </span>
+
+                    <h2>{{ booking.hotelName }}</h2>
+
+                    <p class="hotel-location">
+                        {{ booking.location }}
+                    </p>
+
+                </div>
+
+
+                <!-- STATUS -->
+                <span
+                    class="booking-status"
+                    [class.cancelled-status]="booking.status === 'CANCELLED'">
+
+                    {{ booking.status }}
+
+                </span>
+
+            </div>
+
+
+            <!-- BOOKING REFERENCE -->
+            <div class="booking-reference-section">
+
+                <span>Booking Reference</span>
+
+                <strong>
+                    {{ booking.bookingReference }}
+                </strong>
+
+            </div>
+
+
+            <!-- GUEST DETAILS -->
+            <div class="booking-information-grid">
+
+                <div class="information-item">
+
+                    <span>Guest Name</span>
+
+                    <strong>
+                        {{ booking.guestName }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>Email Address</span>
+
+                    <strong>
+                        {{ booking.email }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>Check-in</span>
+
+                    <strong>
+                        {{ booking.checkIn | date:'dd MMM yyyy' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>Check-out</span>
+
+                    <strong>
+                        {{ booking.checkOut | date:'dd MMM yyyy' }}
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>Number of Nights</span>
+
+                    <strong>
+                        {{ booking.nights }} nights
+                    </strong>
+
+                </div>
+
+
+                <div class="information-item">
+
+                    <span>Price per Night</span>
+
+                    <strong>
+                        {{ booking.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- TOTAL AMOUNT -->
+            <div class="booking-total">
+
+                <span>Total Booking Amount</span>
+
+                <strong>
+                    {{ booking.totalAmount | currency:'INR':'symbol':'1.0-2' }}
+                </strong>
+
+            </div>
+
+
+            <!-- CANCEL BUTTON -->
+            @if (booking.status === 'CONFIRMED') {
+
+                <div class="booking-actions">
+
+                    <button
+                        type="button"
+                        class="cancel-button"
+                        [disabled]="isCancelling"
+                        (click)="cancelBooking()">
+
+                        @if (isCancelling) {
+                            Cancelling Booking...
+                        }
+                        @else {
+                            Cancel Booking
+                        }
+
+                    </button>
+
+                    <p>
+                        Cancelling your reservation will release
+                        the room for other customers.
+                    </p>
+
+                </div>
+
+            }
+
+            <!-- ALREADY CANCELLED -->
+            @else if (booking.status === 'CANCELLED') {
+
+                <div class="cancelled-notice">
+                    This reservation has been cancelled.
+                </div>
+
+            }
+
+        </section>
+
+    }
+
+
+    <!-- FOOTER -->
+    <footer class="bookings-footer">
+
+        <span>StayEase</span>
+
+        <p>
+            Find your place. Make your journey.
+        </p>
+
+    </footer>
+
+</main>

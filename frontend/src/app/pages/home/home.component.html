@@ -1,0 +1,642 @@
+
+<!-- NAVIGATION BAR -->
+<header class="navbar" id="top">
+    <a href="#top" class="brand">
+        <span class="brand-icon">S</span>
+        <span>StayEase</span>
+    </a>
+
+    <nav class="nav-links">
+        <a href="#stays">Explore Stays</a>
+        <a href="#smart-match">Smart Stay Match</a>
+        <a href="#about">About Us</a>
+    </nav>
+
+    <a href="#stays" class="nav-button">
+        Find a Stay ↗
+    </a>
+</header>
+
+<main>
+
+    <!-- HERO SECTION -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <span class="eyebrow">
+                YOUR NEXT GETAWAY STARTS HERE
+            </span>
+
+            <h1>
+                Find your place<br>
+                in the <em>world.</em>
+            </h1>
+
+            <p>
+                Discover beautiful stays, explore new destinations
+                and make every journey memorable.
+            </p>
+
+            <a href="#stays" class="hero-button">
+                Explore Hotels <span>→</span>
+            </a>
+        </div>
+
+        <div class="hero-caption">
+            Thoughtfully chosen stays. Memorable journeys.
+        </div>
+    </section>
+
+    <!-- INTRODUCTION SECTION -->
+    <section class="intro-section" id="about">
+        <div>
+            <span class="section-label">
+                WELCOME TO STAYEASE
+            </span>
+
+            <h2>
+                A better way to<br>
+                find your next stay.
+            </h2>
+        </div>
+
+        <p>
+            Whether you're planning a relaxing escape, a family
+            holiday or a business trip, find a stay that fits your
+            plans, preferences and budget.
+        </p>
+    </section>
+
+    <!-- HOTEL SEARCH SECTION -->
+    <section class="search-section" id="hotel-search">
+        <div class="search-heading">
+            <span class="section-label">
+                PLAN YOUR NEXT STAY
+            </span>
+
+            <h2>Where would you like to go?</h2>
+
+            <p>
+                Choose your destination and travel dates to discover available hotels.
+            </p>
+        </div>
+
+        <form class="hotel-search" (ngSubmit)="searchHotels()">
+            <div class="search-field">
+                <label for="searchLocation">Destination</label>
+
+                <input
+                    type="text"
+                    id="searchLocation"
+                    name="searchLocation"
+                    [(ngModel)]="searchLocation"
+                    placeholder="e.g. Goa, Mumbai, Pune"
+                >
+            </div>
+
+            <div class="search-field">
+                <label for="searchCheckIn">Check-in</label>
+
+                <input
+                    type="date"
+                    id="searchCheckIn"
+                    name="searchCheckIn"
+                    [(ngModel)]="searchCheckIn"
+                    [min]="today"
+                    required
+                >
+            </div>
+
+            <div class="search-field">
+                <label for="searchCheckOut">Check-out</label>
+
+                <input
+                    type="date"
+                    id="searchCheckOut"
+                    name="searchCheckOut"
+                    [(ngModel)]="searchCheckOut"
+                    [min]="searchCheckIn || today"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                class="search-button"
+                [disabled]="isSearching"
+            >
+                {{ isSearching ? 'Searching...' : 'Search Hotels →' }}
+            </button>
+
+            @if (hasSearched) {
+                <button
+                    type="button"
+                    class="clear-search-button"
+                    (click)="clearSearch()"
+                >
+                    Clear Search
+                </button>
+            }
+        </form>
+
+        @if (searchError) {
+            <p class="search-error">
+                {{ searchError }}
+            </p>
+        }
+    </section>
+
+    <!-- FEATURED HOTELS SECTION -->
+    <section class="featured-section" id="stays">
+        <div class="section-heading">
+            <div>
+                <span class="section-label">
+                    EXPLORE OUR COLLECTION
+                </span>
+
+                <h2>
+                    {{ hasSearched ? 'Hotels matching your search.' : 'Stays worth discovering.' }}
+                </h2>
+            </div>
+
+            <span class="collection-count">
+                {{ hotels.length.toString().padStart(2, '0') }} SAMPLE HOTELS
+            </span>
+        </div>
+
+        <div class="hotel-grid">
+
+            <!-- LOADING STATE -->
+            @if (isLoading) {
+                <p class="hotel-state">
+                    Loading beautiful stays...
+                </p>
+            }
+
+            <!-- ERROR STATE -->
+            @else if (errorMessage) {
+                <div class="hotel-state error-state">
+                    <p>{{ errorMessage }}</p>
+
+                    <button
+                        type="button"
+                        (click)="loadHotels()"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            }
+
+            <!-- EMPTY STATE -->
+            @else if (hotels.length === 0) {
+                <p class="hotel-state">
+                    {{ hasSearched
+                        ? 'No hotels available for your selected destination and dates.'
+                        : 'No hotels found.' }}
+                </p>
+            }
+
+            <!-- DISPLAY HOTELS -->
+            @else {
+                @for (hotel of hotels; track hotel.hotelId) {
+                    <a
+                        class="hotel-card"
+                        [routerLink]="['/hotels', hotel.hotelId]"
+                    >
+                        <div class="hotel-image">
+                            @if (hotel.imageUrl) {
+                                <img
+                                    [src]="hotel.imageUrl"
+                                    [alt]="hotel.name"
+                                    loading="lazy"
+                                >
+                            }
+                            @else {
+                                <div class="hotel-image-placeholder">
+                                    Image unavailable
+                                </div>
+                            }
+
+                            <span class="hotel-tag">
+                                {{ hotel.location }} STAY
+                            </span>
+                        </div>
+
+                        <div class="hotel-info">
+                            <span class="hotel-location">
+                                {{ hotel.location | uppercase }}
+                            </span>
+
+                            <h3>{{ hotel.name }}</h3>
+
+                            <p>
+                                {{ hotel.description || 'A comfortable stay for your next trip.' }}
+                            </p>
+
+                            @if (hotel.roomType) {
+                                <div class="hotel-room-type">
+                                    {{ hotel.roomType }}
+                                </div>
+                            }
+
+                            @if (hotel.amenities.length > 0) {
+                                <div class="hotel-amenities">
+                                    @for (
+                                        amenity of hotel.amenities.slice(0, 4);
+                                        track amenity
+                                    ) {
+                                        <span>{{ amenity }}</span>
+                                    }
+                                </div>
+                            }
+
+                            <div class="hotel-bottom">
+                                @if (hotel.pricePerNight !== null) {
+                                    <span>
+                                        <strong>
+                                            {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
+                                        </strong>
+                                        / night
+                                    </span>
+                                }
+                                @else {
+                                    <span>Price unavailable</span>
+                                }
+
+                                <span class="arrow-circle">↗</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            }
+        </div>
+    </section>
+
+    <!-- SMART STAY MATCH SECTION -->
+    <section class="match-section" id="smart-match">
+
+        <div class="match-content">
+            <span class="section-label light-label">
+                A SMARTER WAY TO TRAVEL
+            </span>
+
+            <h2>
+                Your preferences.<br>
+                Your perfect <em>match.</em>
+            </h2>
+
+            <p>
+                Tell us what you are looking for. Our intelligent
+                recommendation system will find hotels that match
+                your budget, destination and favourite amenities.
+            </p>
+        </div>
+
+        <!-- SMART MATCH FORM -->
+        <form
+            class="smart-match-form"
+            (ngSubmit)="findSmartMatches()"
+        >
+            <h3>Find Your Perfect Stay</h3>
+
+            <p class="smart-form-description">
+                Personalise your hotel recommendations.
+            </p>
+
+            <!-- BUDGET -->
+            <div class="smart-field">
+                <label for="smartBudget">
+                    Maximum Budget Per Night (₹)
+                </label>
+
+                <input
+                    type="number"
+                    id="smartBudget"
+                    name="smartBudget"
+                    [(ngModel)]="smartBudget"
+                    placeholder="e.g. 4000"
+                    min="1"
+                    step="100"
+                    required
+                >
+            </div>
+
+            <!-- LOCATION -->
+            <div class="smart-field">
+                <label for="smartLocation">
+                    Preferred Destination
+                </label>
+
+                <input
+                    type="text"
+                    id="smartLocation"
+                    name="smartLocation"
+                    [(ngModel)]="smartLocation"
+                    placeholder="e.g. Goa, Mumbai, Pune"
+                    required
+                >
+            </div>
+
+            <!-- TRAVEL DATES -->
+            <div class="smart-date-fields">
+                <div class="smart-field">
+                    <label for="smartCheckIn">Check-in</label>
+
+                    <input
+                        type="date"
+                        id="smartCheckIn"
+                        name="smartCheckIn"
+                        [(ngModel)]="smartCheckIn"
+                        [min]="today"
+                        required
+                    >
+                </div>
+
+                <div class="smart-field">
+                    <label for="smartCheckOut">Check-out</label>
+
+                    <input
+                        type="date"
+                        id="smartCheckOut"
+                        name="smartCheckOut"
+                        [(ngModel)]="smartCheckOut"
+                        [min]="smartCheckIn || today"
+                        required
+                    >
+                </div>
+            </div>
+
+            <!-- AMENITIES -->
+            <div class="smart-amenities">
+                <label class="amenities-heading">
+                    What facilities do you prefer?
+                </label>
+
+                <p>Select as many as you like.</p>
+
+                <div class="amenities-grid">
+                    @for (
+                        amenity of availableAmenities;
+                        track amenity
+                    ) {
+                        <label class="amenity-option">
+                            <input
+                                type="checkbox"
+                                [checked]="selectedAmenities.includes(amenity)"
+                                (change)="toggleAmenity(amenity, $event)"
+                            >
+
+                            <span>{{ amenity }}</span>
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <!-- ERROR MESSAGE -->
+            @if (smartMatchError) {
+                <p class="smart-match-error">
+                    {{ smartMatchError }}
+                </p>
+            }
+
+            <!-- SUBMIT BUTTON -->
+            <button
+                type="submit"
+                class="smart-match-button"
+                [disabled]="smartMatchLoading"
+            >
+                {{ smartMatchLoading
+                    ? 'Finding Your Matches...'
+                    : 'Find My Matches →' }}
+            </button>
+        </form>
+
+        <!-- MATCH SCORING FACTORS -->
+        <div class="match-details">
+            <div class="match-factor">
+                <span>01</span>
+
+                <div>
+                    <h3>Budget Match</h3>
+                    <p>
+                        Find stays within your spending preference.
+                    </p>
+                </div>
+
+                <strong>40%</strong>
+            </div>
+
+            <div class="match-factor">
+                <span>02</span>
+
+                <div>
+                    <h3>Location Match</h3>
+                    <p>
+                        Prioritise your preferred destination.
+                    </p>
+                </div>
+
+                <strong>30%</strong>
+            </div>
+
+            <div class="match-factor">
+                <span>03</span>
+
+                <div>
+                    <h3>Amenities Match</h3>
+                    <p>
+                        Choose the facilities that matter to you.
+                    </p>
+                </div>
+
+                <strong>30%</strong>
+            </div>
+        </div>
+
+        <!-- LOADING RESULTS -->
+        @if (smartMatchLoading) {
+            <div class="smart-results-message">
+                Finding hotels that match your preferences...
+            </div>
+        }
+
+        <!-- SMART MATCH RESULTS -->
+        @if (hasSmartMatchSearched && !smartMatchLoading && !smartMatchError) {
+            <div class="smart-results">
+
+                <div class="smart-results-heading">
+                    <span class="section-label light-label">
+                        PERSONALIZED RECOMMENDATIONS
+                    </span>
+
+                    <h2>Your Best Matches</h2>
+
+                    <p>
+                        Hotels ranked according to your preferences.
+                    </p>
+                </div>
+
+                @if (smartMatchResults.length === 0) {
+                    <div class="smart-results-message">
+                        No matching hotels found for your preferences.
+                        Try changing your budget, destination or amenities.
+                    </div>
+                }
+                @else {
+                    <div class="smart-results-grid">
+
+                        @for (
+                            result of smartMatchResults;
+                            track result.hotel.hotelId
+                        ) {
+                            <article class="smart-result-card">
+
+                                <!-- HOTEL IMAGE -->
+                                @if (result.hotel.imageUrl) {
+                                    <img
+                                        class="smart-result-image"
+                                        [src]="result.hotel.imageUrl"
+                                        [alt]="result.hotel.name"
+                                        loading="lazy"
+                                    >
+                                }
+                                @else {
+                                    <div class="smart-result-image-placeholder">
+                                        Image unavailable
+                                    </div>
+                                }
+
+                                <div class="smart-result-info">
+
+                                    <span class="smart-result-location">
+                                        {{ result.hotel.location | uppercase }}
+                                    </span>
+
+                                    <h3>{{ result.hotel.name }}</h3>
+
+                                    <p>
+                                        {{ result.hotel.description || 'A comfortable stay for your next trip.' }}
+                                    </p>
+
+                                    <!-- OVERALL MATCH SCORE -->
+                                    <div class="overall-match">
+                                        <strong>
+                                            {{ result.matchScore | number:'1.0-1' }}%
+                                        </strong>
+
+                                        <span>Overall Match</span>
+                                    </div>
+
+                                    <!-- INDIVIDUAL MATCH SCORES -->
+                                    <div class="score-breakdown">
+
+                                        <div class="score-item">
+                                            <div>
+                                                <span>Budget</span>
+
+                                                <strong>
+                                                    {{ result.budgetScore | number:'1.0-1' }}%
+                                                </strong>
+                                            </div>
+
+                                            <div class="score-track">
+                                                <div
+                                                    class="score-fill"
+                                                    [style.width.%]="result.budgetScore"
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="score-item">
+                                            <div>
+                                                <span>Location</span>
+
+                                                <strong>
+                                                    {{ result.locationScore | number:'1.0-1' }}%
+                                                </strong>
+                                            </div>
+
+                                            <div class="score-track">
+                                                <div
+                                                    class="score-fill"
+                                                    [style.width.%]="result.locationScore"
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="score-item">
+                                            <div>
+                                                <span>Amenities</span>
+
+                                                <strong>
+                                                    {{ result.amenitiesScore | number:'1.0-1' }}%
+                                                </strong>
+                                            </div>
+
+                                            <div class="score-track">
+                                                <div
+                                                    class="score-fill"
+                                                    [style.width.%]="result.amenitiesScore"
+                                                ></div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- AVAILABLE ROOMS -->
+                                    <p class="available-room-count">
+                                        {{ result.availableRooms }} rooms available
+                                    </p>
+
+                                    <!-- MATCH REASONS -->
+                                    @if (result.reasons.length > 0) {
+                                        <div class="match-reasons">
+                                            <h4>Why this hotel matches</h4>
+
+                                            <ul>
+                                                @for (
+                                                    reason of result.reasons;
+                                                    track reason
+                                                ) {
+                                                    <li>{{ reason }}</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+
+                                    <!-- VIEW HOTEL -->
+                                    <a
+                                        class="view-match-hotel"
+                                        [routerLink]="['/hotels', result.hotel.hotelId]"
+                                    >
+                                        View Hotel →
+                                    </a>
+
+                                </div>
+                            </article>
+                        }
+
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <a href="#top" class="brand footer-brand">
+            <span class="brand-icon">S</span>
+            <span>StayEase</span>
+        </a>
+
+        <p>
+            Find your place. Make your journey.
+        </p>
+
+        <span>
+            © 2026 StayEase. Academic Project.
+        </span>
+    </footer>
+
+</main>

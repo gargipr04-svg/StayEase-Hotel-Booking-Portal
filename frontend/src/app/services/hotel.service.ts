@@ -3,6 +3,20 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { Hotel } from '../models/hotel.model';
+import {
+  SmartStayMatchRequest,
+  SmartStayMatchResponse
+} from '../models/smart-stay-match.model';
+
+
+// Room availability response from Spring Boot
+export interface RoomAvailability {
+  hotelId: number;
+  checkIn: string;
+  checkOut: string;
+  available: boolean;
+  availableRooms: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +28,15 @@ export class HotelService {
 
   constructor(private http: HttpClient) {}
 
-  // Retrieve all hotels
+smartStayMatch(
+  request: SmartStayMatchRequest
+): Observable<SmartStayMatchResponse[]> {
+  return this.http.post<SmartStayMatchResponse[]>(
+    `${this.apiUrl}/smart-match`,
+    request
+  );
+}
+    // Retrieve all hotels
   getAllHotels(): Observable<Hotel[]> {
     return this.http.get<Hotel[]>(this.apiUrl);
   }
@@ -41,6 +63,23 @@ export class HotelService {
 
     return this.http.get<Hotel[]>(
       `${this.apiUrl}/search`,
+      { params }
+    );
+  }
+
+  // Retrieve available rooms for selected dates
+  getAvailability(
+    hotelId: number,
+    checkIn: string,
+    checkOut: string
+  ): Observable<RoomAvailability> {
+
+    const params = new HttpParams()
+      .set('checkIn', checkIn)
+      .set('checkOut', checkOut);
+
+    return this.http.get<RoomAvailability>(
+      `${this.apiUrl}/${hotelId}/availability`,
       { params }
     );
   }

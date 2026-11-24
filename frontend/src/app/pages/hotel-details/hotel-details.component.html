@@ -1,0 +1,383 @@
+<main class="details-page">
+
+    <!-- BACK NAVIGATION -->
+    <a routerLink="/" class="back-link">
+        ← Back to all stays
+    </a>
+
+    <!-- LOADING -->
+    @if (isLoading) {
+
+        <div class="details-state">
+            Loading hotel details...
+        </div>
+
+    }
+
+    <!-- HOTEL ERROR -->
+    @else if (errorMessage) {
+
+        <div class="details-state error-state">
+
+            <h2>Hotel unavailable</h2>
+
+            <p>{{ errorMessage }}</p>
+
+            <a routerLink="/">
+                Explore other hotels
+            </a>
+
+        </div>
+
+    }
+
+    <!-- HOTEL DETAILS -->
+    @else if (hotel) {
+
+        <!-- HOTEL HERO -->
+        <section class="details-hero">
+
+            <div class="details-image">
+
+                @if (hotel.imageUrl) {
+
+                    <img
+                        [src]="hotel.imageUrl"
+                        [alt]="hotel.name">
+
+                }
+                @else {
+
+                    <div class="image-placeholder">
+                        Image unavailable
+                    </div>
+
+                }
+
+            </div>
+
+            <div class="details-heading">
+
+                <span class="section-label">
+                    {{ hotel.location | uppercase }}
+                </span>
+
+                <h1>{{ hotel.name }}</h1>
+
+                <p>{{ hotel.description }}</p>
+
+                
+<div class="room-summary">
+
+    <span>
+        {{ hotel.roomType || 'Room information unavailable' }}
+    </span>
+
+    <span>
+        {{ hotel.totalRooms ?? 'N/A' }} total rooms
+    </span>
+
+    @if (availableRooms !== null) {
+        <span class="available-rooms">
+            {{ availableRooms }} rooms available
+        </span>
+    }
+
+</div>
+
+            </div>
+
+        </section>
+
+        <!-- HOTEL INFORMATION AND BOOKING -->
+        <section class="details-content">
+
+            <!-- AMENITIES -->
+            <div class="amenities-section">
+
+                <span class="section-label">
+                    YOUR STAY EXPERIENCE
+                </span>
+
+                <h2>Everything you need.</h2>
+
+                <p>{{ hotel.description }}</p>
+
+                <h3>Available Amenities</h3>
+
+                <div class="amenity-list">
+
+                    @for (
+                        amenity of hotel.amenities;
+                        track amenity
+                    ) {
+
+                        <span class="amenity-item">
+                            ✓ {{ amenity }}
+                        </span>
+
+                    }
+
+                </div>
+
+            </div>
+
+            <!-- BOOKING CARD -->
+            <aside class="booking-card">
+
+                <!-- SUCCESSFUL BOOKING -->
+                @if (bookingSuccess) {
+
+                    <div class="booking-success">
+
+                        <div class="success-icon">✓</div>
+
+                        <span class="booking-label">
+                            RESERVATION CONFIRMED
+                        </span>
+
+                        <h2>You're booked!</h2>
+
+                        <p>
+                            Your booking reference is:
+                        </p>
+
+                        <div class="reference-box">
+                            {{ bookingSuccess.bookingReference }}
+                        </div>
+
+                        <div class="booking-divider"></div>
+
+                        <p>Guest name</p>
+                        <strong>
+                            {{ bookingSuccess.guestName }}
+                        </strong>
+
+                        <p>Stay duration</p>
+                        <strong>
+                            {{ bookingSuccess.nights }} nights
+                        </strong>
+
+                        <p>Total amount</p>
+                        <h2 class="success-price">
+                            {{ bookingSuccess.totalAmount | currency:'INR':'symbol':'1.0-2' }}
+                        </h2>
+
+                        <span class="confirmed-status">
+                            {{ bookingSuccess.status }}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="book-button"
+                            (click)="bookAgain()">
+                            Book Another Stay
+                        </button>
+
+                    </div>
+
+                }
+
+                <!-- BOOKING FORM -->
+                @else {
+
+                    <span class="booking-label">
+                        RESERVE YOUR ROOM
+                    </span>
+
+                    <h2>
+                        @if (hotel.pricePerNight !== null) {
+                            {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
+                            <small>/ night</small>
+                        }
+                        @else {
+                            Price unavailable
+                        }
+                    </h2>
+
+                    <div class="booking-divider"></div>
+
+                    <form
+                        #bookingForm="ngForm"
+                        (ngSubmit)="submitBooking()">
+
+                        <!-- GUEST NAME -->
+                        <div class="form-group">
+
+                            <label for="guestName">
+                                Full Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="guestName"
+                                name="guestName"
+                                [(ngModel)]="guestName"
+                                placeholder="Enter your full name"
+                                maxlength="150"
+                                required>
+
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="form-group">
+
+                            <label for="email">
+                                Email Address
+                            </label>
+
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                [(ngModel)]="email"
+                                placeholder="Enter your email"
+                                maxlength="255"
+                                required
+                                email>
+
+                        </div>
+
+                        <!-- CHECK-IN -->
+                        <div class="form-group">
+
+                            <label for="checkIn">
+                                Check-in Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="checkIn"
+                                name="checkIn"
+                                [(ngModel)]="checkIn"
+                                [min]="today"
+                                required
+                                (ngModelChange)="loadAvailability()"    >
+
+                        </div>
+
+                        <!-- CHECK-OUT -->
+                        <div class="form-group">
+
+                            <label for="checkOut">
+                                Check-out Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="checkOut"
+                                name="checkOut"
+                                [(ngModel)]="checkOut"
+                                [min]="minimumCheckoutDate"
+                                required
+                                (ngModelChange)="loadAvailability()">
+
+                        </div>
+
+<!-- ROOM AVAILABILITY -->
+
+@if (availabilityLoading) {
+
+    <div class="availability-message">
+        Checking room availability...
+    </div>
+
+}
+@else if (availabilityError) {
+
+    <div class="booking-error">
+        {{ availabilityError }}
+    </div>
+
+}
+@else if (availableRooms !== null) {
+
+    <div class="availability-message"
+         [class.no-rooms]="availableRooms === 0">
+
+        @if (availableRooms > 0) {
+            ✓ {{ availableRooms }} rooms available for your dates
+        }
+        @else {
+            No rooms available for these dates.
+        }
+
+    </div>
+
+}
+                            <!-- PRICE PREVIEW -->
+                        @if (numberOfNights > 0) {
+
+                            <div class="price-preview">
+
+                                <div>
+                                    <span>
+                                        {{ hotel.pricePerNight | currency:'INR':'symbol':'1.0-2' }}
+                                    </span>
+
+                                    × {{ numberOfNights }} nights
+                                </div>
+
+                                <div class="estimated-total">
+
+                                    <strong>
+                                        Estimated Total
+                                    </strong>
+
+                                    <strong>
+                                        {{ estimatedTotal | currency:'INR':'symbol':'1.0-2' }}
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        }
+
+                        <!-- BOOKING ERROR -->
+                        @if (bookingError) {
+
+                            <div class="booking-error">
+                                {{ bookingError }}
+                            </div>
+
+                        }
+
+                        <!-- SUBMIT BUTTON -->
+                        <button
+                            type="submit"
+                            class="book-button"
+                            [disabled]="
+  bookingLoading ||
+  bookingForm.invalid ||
+  availabilityLoading ||
+  availabilityError !== '' ||
+  availableRooms === null ||
+  availableRooms <= 0
+">
+
+                            @if (bookingLoading) {
+                                Processing Booking...
+                            }
+                            @else {
+                                Confirm Booking →
+                            }
+
+                        </button>
+
+                        <p class="booking-note">
+                            Your booking will be confirmed after
+                            the backend verifies room availability.
+                        </p>
+
+                    </form>
+
+                }
+
+            </aside>
+
+        </section>
+
+    }
+
+</main>
